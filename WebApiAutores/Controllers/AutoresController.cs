@@ -26,8 +26,8 @@ namespace WebApiAutores.Controllers
             return await context.Autores.Include(x => x.Libros).ToListAsync();
         }
 
-        [HttpGet("primero")] // [GET]/api/autores/primero
-        public async Task<ActionResult<Autor>> PrimerAutor()
+        [HttpGet("primero")] // [GET]/api/autores/primero?nombre=fulano
+        public async Task<ActionResult<Autor>> PrimerAutor([FromHeader] int miValor, [FromQuery] string nombre)
         {
             return await context.Autores.FirstOrDefaultAsync();
         }
@@ -43,7 +43,7 @@ namespace WebApiAutores.Controllers
         }
         
         [HttpGet("{nombre}")]   // [GET]/api/autores/fulano
-        public async Task<ActionResult<Autor>> Get(string nombre)
+        public async Task<ActionResult<Autor>> Get([FromRoute]string nombre)
         {
             var autor = await context.Autores.FirstOrDefaultAsync(x => x.Nombre.Contains(nombre));
             return autor == null
@@ -52,7 +52,7 @@ namespace WebApiAutores.Controllers
         }
 
         [HttpPost] //    [POST]/api/autores
-        public async Task<ActionResult> Post(Autor autor)
+        public async Task<ActionResult> Post([FromBody]Autor autor)
         {
             context.Add(autor);
             await context.SaveChangesAsync();
