@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiAutores.Entidades;
+using WebApiAutores.Servicios;
 
 namespace WebApiAutores.Controllers
 {
@@ -11,10 +12,34 @@ namespace WebApiAutores.Controllers
     public class AutoresController : ControllerBase
     {
         private readonly AppDbContext context;
+        private readonly IServicio servicio;
+        private readonly ServicioTransient servicioTransient;
+        private readonly ServicioScoped servicioScoped;
+        private readonly ServicioSingleton servicioSingleton;
+        private readonly ILogger<AutoresController> logger;
 
-        public AutoresController(AppDbContext context)
+        public AutoresController(AppDbContext context, IServicio servicio, ServicioTransient servicioTransient,
+            ServicioScoped servicioScoped, ServicioSingleton servicioSingleton, ILogger<AutoresController> logger)
         {
             this.context = context;
+            this.servicio = servicio;
+            this.servicioTransient = servicioTransient;
+            this.servicioScoped = servicioScoped;
+            this.servicioSingleton = servicioSingleton;
+            this.logger = logger;
+        }
+
+        [HttpGet("GUID")]
+        public ActionResult ObtenerGuids()
+        {
+            return Ok(new {
+                Transient = servicioTransient.Guid,
+                ServicioATransient = servicio.ObtenerTransient(),
+                Scoped = servicioScoped.Guid,
+                ServicioAScoped= servicio.ObtenerScoped(),
+                Singleton = servicioSingleton.Guid,
+                ServicioASingleton= servicio.ObtenerSingleton()
+            });
         }
 
         // creamos varias rutas para la misma acción
@@ -23,6 +48,8 @@ namespace WebApiAutores.Controllers
         [HttpGet("/listado")]   // [GET]/listado - teniendo la '/' al inicio, omitimos la ruta base
         public async Task<ActionResult<List<Autor>>> Get()
         {
+            logger.LogInformation("Estamos obteniendo los autores");
+            servicio.RealizarTarea();
             return await context.Autores.Include(x => x.Libros).ToListAsync();
         }
 
