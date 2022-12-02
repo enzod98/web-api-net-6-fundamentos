@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using WebApiAutores.Filtros;
+using WebApiAutores.Middlewares;
 using WebApiAutores.Servicios;
 
 namespace WebApiAutores
@@ -16,7 +19,10 @@ namespace WebApiAutores
         {
 
             // Add services to the container.
-            services.AddControllers().AddJsonOptions(x =>
+            services.AddControllers(opciones =>
+            {
+                opciones.Filters.Add(typeof(FiltroDeExcepcion));
+            }).AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
             );
 
@@ -36,13 +42,36 @@ namespace WebApiAutores
             services.AddScoped<ServicioScoped>();
             services.AddSingleton<ServicioSingleton>();
 
+            services.AddTransient<FiltroDeAccion>();    //Importar filtros personalizados
+            services.AddHostedService<EscribirEnArchivo>();    //Importar filtros personalizados
+            
+            //caché de respuesta
+            services.AddResponseCaching();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
+            //Añadir Middleware personalizado
+            //app.UseMiddleware<LoguearRespuestaHTTPMidleware>();
+
+            app.UseLoguearRespuestaHTTP();
+
+            //bifurcación
+            app.Map("/ruta1", app =>
+            {
+                //Con run podemos ejecutar un middleware y detener la ejecución de los siguientes
+                app.Run(async contexto =>
+                {
+                    await contexto.Response.WriteAsync("Estoy interceptando la tubería");
+                });
+            });
+
             // Configure the HTTP request pipeline.
             if (env.IsDevelopment())
             {
@@ -53,6 +82,8 @@ namespace WebApiAutores
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseResponseCaching();
 
             app.UseAuthorization();
 

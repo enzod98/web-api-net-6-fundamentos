@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiAutores.Entidades;
+using WebApiAutores.Filtros;
 using WebApiAutores.Servicios;
 
 namespace WebApiAutores.Controllers
@@ -30,8 +31,11 @@ namespace WebApiAutores.Controllers
         }
 
         [HttpGet("GUID")]
+        [ResponseCache(Duration = 10)]
+        [ServiceFilter(typeof(FiltroDeAccion))]
         public ActionResult ObtenerGuids()
         {
+            throw new NotImplementedException();
             return Ok(new {
                 Transient = servicioTransient.Guid,
                 ServicioATransient = servicio.ObtenerTransient(),
