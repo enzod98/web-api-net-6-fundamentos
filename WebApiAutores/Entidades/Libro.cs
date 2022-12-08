@@ -1,10 +1,16 @@
-﻿namespace WebApiAutores.Entidades
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using WebApiAutores.Validaciones;
+
+namespace WebApiAutores.Entidades
 {
     public class Libro
     {
         public int Id { get; set; }
+        [PrimeraLetraMayuscula]
+        [StringLength(maximumLength: 250)]
+        [Required]
         public string Titulo { get; set; }
-        public int AutorId { get; set; }
-        public Autor Autor { get; set; }
+        public List<Comentario> Comentarios { get; set; }
     }
 }
