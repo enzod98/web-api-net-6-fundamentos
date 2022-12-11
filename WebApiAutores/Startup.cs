@@ -23,7 +23,7 @@ namespace WebApiAutores
                 opciones.Filters.Add(typeof(FiltroDeExcepcion));
             }).AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
-            );
+            ).AddNewtonsoftJson();
 
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(
                 Configuration.GetConnectionString("defaultConnection")
