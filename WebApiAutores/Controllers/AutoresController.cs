@@ -15,11 +15,19 @@ namespace WebApiAutores.Controllers
     {
         private readonly AppDbContext context;
         private readonly IMapper mapper;
+        private readonly IConfiguration configuration;
 
-        public AutoresController(AppDbContext context, IMapper mapper)
+        public AutoresController(AppDbContext context, IMapper mapper, IConfiguration configuration)
         {
             this.context = context;
             this.mapper = mapper;
+            this.configuration = configuration;
+        }
+
+        [HttpGet("configuraciones")]
+        public ActionResult<string> obtenerConfig()
+        {
+            return configuration["apellido"];
         }
 
 
